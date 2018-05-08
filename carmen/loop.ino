@@ -115,11 +115,13 @@ void loop()
 
     case GameState::CaseIntro:
       {
-        String s = "Hello, the";
+        //String s = "Hello, the";
         //s += AsFlashStringHelper(pgm_read_word(&artifacts[stolenPiece].Name));
         //s += " was stolen from ";
         //s += AsFlashStringHelper(pgm_read_word(&artifacts[stolenPiece].StolenFrom));;
-        doMessageBox(s.c_str(), false);
+        //doMessageBox(s.c_str(), false);
+		
+        doMessageBox(F("Hello, the"));
         gameState = GameState::CaseMenu;
       }
       break;
@@ -151,7 +153,7 @@ void loop()
 
       if (arduboy.justPressed(A_BUTTON))
       {
-        doMessageBox("hint 1", false);
+        doMessageBox(F("hint 1"));
         gameState = GameState::CaseMenu;
       }
       arduboy.display();
@@ -223,7 +225,7 @@ void loop()
       {
         case 0: gameState = GameState::CaseSetup; break;
         case 1: arduboy.audio.toggle(); arduboy.audio.saveOnOff(); break;
-        case 2: doMessageBox(msgAbout); break;
+        case 2: doMessageBox(AsFlashStringHelper(msgAbout)); break;
         case CANCEL: gameState = GameState::GameSplash; break;
       }
       break;
