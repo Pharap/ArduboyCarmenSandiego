@@ -5,7 +5,7 @@
 #include "images.h"
 #include "structs.h"
 #include "music.h"
-#include "Tinyfont.h"
+//#include "Tinyfont.h"
 
 //#define DEBUG
 //#define MIRRORING
@@ -13,33 +13,49 @@
 //Initialize the arduboy object
 Arduboy2 arduboy;
 ArduboyPlaytune tunes(arduboy.audio.enabled);
-Tinyfont tinyfont = Tinyfont(arduboy.sBuffer, Arduboy2::width(), Arduboy2::height());
+//Tinyfont tinyfont = Tinyfont(arduboy.sBuffer, Arduboy2::width(), Arduboy2::height());
 
 // ------ Game parameters -------
 // const char STARTINGLEVEL = 0;
 // -----------------------------
 
+#ifdef DEBUG
+ #define DEBUG_PRINT(x)     Serial.print (x)
+ #define DEBUG_PRINTDEC(x)     Serial.print (x, DEC)
+ #define DEBUG_PRINTLN(x)  Serial.println (x)
+#else
+ #define DEBUG_PRINT(x)
+ #define DEBUG_PRINTDEC(x)
+ #define DEBUG_PRINTLN(x) 
+#endif
+
 #define CANCEL 0xFF
 //#define TOTAL_VILLAINS 7 // Not including Carmen Sandiego
-#define TOTAL_PLACES 20
 
-byte currentVillain, currentPlace, nextPlace, remainingPlaces, elapsedHours;
+byte currentVillain, currentPlace, stolenPiece, remainingPlaces, elapsedHours;
 GameState gameState = GameState::GameSplash;
 
 bool captured[TOTAL_VILLAINS];
 bool recovered[TOTAL_ARTIFACTS];
-bool visited[TOTAL_PLACES];
-byte investigate[3];
+bool visited[TOTAL_DESTINATIONS];
+byte investigate[5];
 
 void setup()
 {
+#ifdef DEBUG
+  Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+#endif
+
   for (byte i = 0; i < TOTAL_VILLAINS; i++)
     captured[i] = false;
 
   for (byte i = 0; i < TOTAL_ARTIFACTS; i++)
     recovered[i] = false;
 
-  for (byte i = 0; i < TOTAL_PLACES; i++)
+  for (byte i = 0; i < TOTAL_DESTINATIONS; i++)
     visited[i] = false;
 
   arduboy.begin();

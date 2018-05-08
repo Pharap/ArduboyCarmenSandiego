@@ -11,7 +11,7 @@ byte getCurrentLevel()
 
   return v;
 }
-
+/*
 char * computerDayHour(byte hours)
 {
   String s;
@@ -42,6 +42,7 @@ char * computerDayHour(byte hours)
   }
   return s.c_str();
 }
+*/
 
 void loop()
 {
@@ -62,7 +63,7 @@ void loop()
       {
         do
         {
-          currentVillain = random(1, TOTAL_VILLAINS - 1);
+          currentVillain = random(1, TOTAL_VILLAINS);
         } while (captured[currentVillain]);
       }
       else
@@ -74,18 +75,39 @@ void loop()
       // Select place
       do
       {
-        currentPlace = random(0, TOTAL_PLACES - 1);
+        currentPlace = 0;
+        investigate[0] = random(0, TOTAL_PLACES);
       } while (visited[currentPlace]);
 
-      visited[currentPlace] = true;
+      //visited[currentPlace] = true;
 
       // Select next place
       remainingPlaces = 5; // To capture the villain
-      nextPlace = 1; // Id of the new place (random in the connections)
+
+      byte p, c[5];
+      
+      DEBUG_PRINTLN(F("Next case is: "));
+      for (int place = 1; place < remainingPlaces; place++)
+      {
+        p = 0;
+        for (int i = 0; i < TOTAL_DESTINATIONS; i++)
+        {
+          if (pgm_read_byte(&connections[0] + investigate[place - 1] * TOTAL_DESTINATIONS + i))
+            c[p++] = i;
+        }
+
+        // Select next place
+        investigate[place] = c[random(0, p)];
+        DEBUG_PRINT(investigate[place]);
+        DEBUG_PRINT(" ");
+      }
+
+      //nextPlace = 1; // Id of the new place (random in the connections)
       // setup investigate[] array to the places to investigate
       caseInvestigateSelection = 0;
       caseDepartSelection = 0;
       elapsedHours = 9; //6 * 24 + 8;
+      stolenPiece = random(0,TOTAL_ARTIFACTS);
 
       gameState = GameState::CaseIntro;
 
@@ -93,10 +115,10 @@ void loop()
 
     case GameState::CaseIntro:
       {
-        String s = "I saw that person, he was travelling to the home of the world's first psychotherapist, sigmund freud ";
-        s += currentVillain;
-        s += " in ";
-        s += currentPlace;
+        String s = "Hello, the";
+        //s += AsFlashStringHelper(pgm_read_word(&artifacts[stolenPiece].Name));
+        //s += " was stolen from ";
+        //s += AsFlashStringHelper(pgm_read_word(&artifacts[stolenPiece].StolenFrom));;
         doMessageBox(s.c_str(), false);
         gameState = GameState::CaseMenu;
       }
@@ -139,7 +161,7 @@ void loop()
     case GameState::CaseInterpol:
       arduboy.clear();
 
-      arduboy.print("interpol computer");
+      arduboy.print("Interpol");
 
       if (arduboy.justPressed(DOWN_BUTTON) || arduboy.justPressed(LEFT_BUTTON))
         caseInvestigateSelection++;
@@ -199,7 +221,7 @@ void loop()
     case GameState::GameMenu:
       switch (drawMenu(MainMenu, mainMenuSelection))
       {
-        case 0: gameState = GameState::GameIntro; break;
+        case 0: gameState = GameState::CaseSetup; break;
         case 1: arduboy.audio.toggle(); arduboy.audio.saveOnOff(); break;
         case 2: doMessageBox(msgAbout); break;
         case CANCEL: gameState = GameState::GameSplash; break;
@@ -224,17 +246,15 @@ void loop()
       break;
 
     default:
-#ifdef DEBUG
-      Serial.print("PLAYING, NEXT STATE: ");
-      Serial.println(gameState);
-#endif
+      DEBUG_PRINT("PLAYING, NEXT STATE: ");
+      DEBUG_PRINT((int)gameState);
       break;
   }
 
   // HUD with place and time
-  tinyfont.setCursor(20, 0);
+  /*tinyfont.setCursor(20, 0);
   tinyfont.print(computerDayHour(elapsedHours));
-  arduboy.display();
+  arduboy.display();*/
 }
 
 
